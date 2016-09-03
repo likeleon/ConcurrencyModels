@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Puzzle", "ThreadsLocks\Puzz
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Philosopher", "ThreadsLocks\Philosopher\Philosopher.csproj", "{601BD9E2-D25B-46C9-BBE2-20D0C810B877}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uninterruptible", "ThreadsLocks\Uninterruptible\Uninterruptible.csproj", "{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -35,6 +37,10 @@ Global
 		{601BD9E2-D25B-46C9-BBE2-20D0C810B877}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{601BD9E2-D25B-46C9-BBE2-20D0C810B877}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{601BD9E2-D25B-46C9-BBE2-20D0C810B877}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,5 +50,6 @@ Global
 		{E491D5D4-0A91-4EE9-99B4-D4C16AC97FF1} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{F128E15B-EFB0-42CE-B768-4DB4F1A301DE} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{601BD9E2-D25B-46C9-BBE2-20D0C810B877} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
+		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 	EndGlobalSection
 EndGlobal

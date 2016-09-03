@@ -11,8 +11,9 @@ namespace Philosopher
         {
             int numPhilosophers = 5;
             var chopsticks = Generate(numPhilosophers, i => new Chopstick(i)).ToArray();
-            var philosophers = Generate(numPhilosophers, i => new Philosopher(i, chopsticks[i], chopsticks[(i + 1) % numPhilosophers])).ToArray();
-            //var philosophers = Generate(count, i => new PhilosopherFixed(i, chopsticks[i], chopsticks[(i + 1) % count])).ToArray();
+            //var philosophers = Generate(numPhilosophers, i => new Philosopher(i, chopsticks[i], chopsticks[(i + 1) % numPhilosophers])).ToArray();
+            //var philosophers = Generate(numPhilosophers, i => new PhilosopherFixed(i, chopsticks[i], chopsticks[(i + 1) % numPhilosophers])).ToArray();
+            var philosophers = Generate(numPhilosophers, i => new PhilosopherTimeout(i, chopsticks[i], chopsticks[(i + 1) % numPhilosophers])).ToArray();
             var threads = Generate(numPhilosophers, i => new Thread(() => philosophers[i].Run())).ToList();
             threads.ForEach(t => t.Start());
             threads.ForEach(t => t.Join());
@@ -118,6 +119,46 @@ namespace Philosopher
                 }
             }
 
+        }
+    }
+
+    class PhilosopherTimeout : Philosopher
+    {
+        public PhilosopherTimeout(int index, Chopstick left, Chopstick right) 
+            : base(index, left, right)
+        {
+        }
+
+        protected override void Loop(bool tryDeadlock)
+        {
+            Think();
+            Monitor.Enter(_left);
+            try
+            {
+                Console.WriteLine($"{_index} got {_left}");
+
+                if (tryDeadlock)
+                    Think(1000);
+
+                if (Monitor.TryEnter(_right, TimeSpan.FromSeconds(1)))
+                {
+                    Console.WriteLine($"{_index} got {_right}");
+                    try
+                    {
+                        Eat();
+                    }
+                    finally
+                    {
+                        Monitor.Exit(_right);
+                        Console.WriteLine($"{_index} released {_right}");
+                    }
+                }
+            }
+            finally
+            {
+                Monitor.Exit(_left);
+                Console.WriteLine($"{_index} released {_left}");
+            }
         }
     }
 
