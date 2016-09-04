@@ -9,6 +9,8 @@ namespace ConcurrentSortedList
         static void Main(string[] args)
         {
             var list = new ConcurrentSortedList();
+            //var list = new SynchronizedSortedList();
+            
             var random = new Random();
 
             var testThreads = Enumerable.Range(0, 2).Select(_ => new Thread(() =>
@@ -33,11 +35,13 @@ namespace ConcurrentSortedList
                 }
             });
 
+            var start = DateTime.Now;
             testThreads.ForEach(t => t.Start());
             countingThread.Start();
 
             testThreads.ForEach(t => t.Join());
             countingThread.Interrupt();
+            Console.WriteLine($"\rElapsed: {DateTime.Now - start}");
 
             Console.WriteLine($"\r{list.Size()}");
 
@@ -48,26 +52,88 @@ namespace ConcurrentSortedList
                 Console.WriteLine("*** Not sorted!");
         }
 
-        class ConcurrentSortedList
+        class Node
         {
-            class Node
+            public int Value { get; }
+            public Node Prev { get; set; }
+            public Node Next { get; set; }
+
+            public Node()
             {
-                public int Value { get; }
-                public Node Prev { get; set; }
-                public Node Next { get; set; }
+            }
 
-                public Node()
-                {
-                }
+            public Node(int value, Node prev, Node next)
+            {
+                Value = value;
+                Prev = prev;
+                Next = next;
+            }
+        }
 
-                public Node(int value, Node prev, Node next)
+        class SynchronizedSortedList
+        {
+            readonly Node _head = new Node();
+            readonly Node _tail = new Node();
+            readonly object _lock = new object();
+
+            public SynchronizedSortedList()
+            {
+                _head.Next = _tail;
+                _tail.Prev = _head;
+            }
+
+            public void Insert(int value)
+            {
+                lock (_lock)
                 {
-                    Value = value;
-                    Prev = prev;
-                    Next = next;
+                    var current = _head;
+                    var next = current.Next;
+                    while (true)
+                    {
+                        if (next == _tail || next.Value < value)
+                        {
+                            var node = new Node(value, current, next);
+                            next.Prev = node;
+                            current.Next = node;
+                            return;
+                        }
+                        current = next;
+                        next = current.Next;
+                    }
                 }
             }
 
+            public int Size()
+            {
+                lock (_lock)
+                {
+                    var current = _tail;
+                    int count = 0;
+
+                    while (current.Prev != _head)
+                    {
+                        ++count;
+                        current = current.Prev;
+                    }
+                    return count;
+                }
+            }
+
+            public bool IsSorted()
+            {
+                var current = _head;
+                while (current.Next.Next != _tail)
+                {
+                    current = current.Next;
+                    if (current.Value < current.Next.Value)
+                        return false;
+                }
+                return true;
+            }
+        }
+
+        class ConcurrentSortedList
+        {
             readonly Node _head = new Node();
             readonly Node _tail = new Node();
 
