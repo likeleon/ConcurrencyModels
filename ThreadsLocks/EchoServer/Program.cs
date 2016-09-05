@@ -15,16 +15,35 @@ namespace EchoServer
             listener.Start();
             try
             {
-                while (true)
-                {
-                    var socket = listener.AcceptSocket();
-                    var thread = new Thread(HandleConnection);
-                    thread.Start(socket);
-                }
+                //NormalLoop(listener);
+                BetterLoop(listener);
             }
             finally
             {
                 listener.Stop();
+            }
+        }
+
+        static void NormalLoop(TcpListener listener)
+        {
+            while (true)
+            {
+                var socket = listener.AcceptSocket();
+                var thread = new Thread(HandleConnection);
+                thread.Start(socket);
+            }
+        }
+
+        static void BetterLoop(TcpListener listener)
+        {
+            int workerThreads, completionPortThreads;
+            ThreadPool.GetMaxThreads(out workerThreads, out completionPortThreads);
+            ThreadPool.SetMaxThreads(Environment.ProcessorCount * 2, completionPortThreads);
+
+            while (true)
+            {
+                var socket = listener.AcceptSocket();
+                ThreadPool.QueueUserWorkItem(HandleConnection, socket);
             }
         }
 
