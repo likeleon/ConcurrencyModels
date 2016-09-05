@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Uninterruptible", "ThreadsL
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConcurrentSortedList", "ThreadsLocks\ConcurrentSortedList\ConcurrentSortedList.csproj", "{A1738C62-8854-4C7E-B5D1-7E149071894E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoServer", "ThreadsLocks\EchoServer\EchoServer.csproj", "{912E32D4-2C90-4284-B131-775B77C061E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -47,6 +49,10 @@ Global
 		{A1738C62-8854-4C7E-B5D1-7E149071894E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A1738C62-8854-4C7E-B5D1-7E149071894E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A1738C62-8854-4C7E-B5D1-7E149071894E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{912E32D4-2C90-4284-B131-775B77C061E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{912E32D4-2C90-4284-B131-775B77C061E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{912E32D4-2C90-4284-B131-775B77C061E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{912E32D4-2C90-4284-B131-775B77C061E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -58,5 +64,6 @@ Global
 		{601BD9E2-D25B-46C9-BBE2-20D0C810B877} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{A1738C62-8854-4C7E-B5D1-7E149071894E} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
+		{912E32D4-2C90-4284-B131-775B77C061E0} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 	EndGlobalSection
 EndGlobal
