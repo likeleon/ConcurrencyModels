@@ -1,98 +1,89 @@
 ﻿using System;
-using System.Collections;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Linq;
-using System.Xml;
+using System.Threading;
 
 namespace WordCount
 {
     class Program
     {
-        static readonly Dictionary<string, int> _counts = new Dictionary<string, int>();
+        static int MaxPages => 100000;
+        static string Filename => @"C:\Users\likeleon\Downloads\enwiki-latest-pages-articles1.xml";
+
 
         static void Main(string[] args)
         {
             var start = DateTime.Now;
-            var pages = new Pages(100000, @"C:\Users\likeleon\Downloads\enwiki-latest-pages-articles1.xml");
-            foreach (var page in pages)
-            {
-                var words = new Words(page.Text);
-                foreach (var word in words)
-                    CountWord(word);
-            }
+            //RunSequential();
+            RunProducerConsumer();
             Console.WriteLine($"Elapsed {DateTime.Now - start}.");
         }
 
-        static void CountWord(string word)
+        static void RunSequential()
         {
-            if (_counts.ContainsKey(word))
-                _counts[word] += 1;
-            else
-                _counts[word] = 1;
+            var counts = new Dictionary<string, int>();
+            foreach (var page in new Pages(MaxPages, Filename))
+                page.Text.CountWord(counts);
+        }
+
+        static void RunProducerConsumer()
+        {
+            var pages = new BlockingCollection<Page>();
+            var parser = new Thread(() => Parser.Parse(pages, MaxPages, Filename));
+            parser.Start();
+
+            var counts = new Dictionary<string, int>();
+            var counter = new Thread(() => Counter.Count(pages, counts));
+            counter.Start();
+
+            parser.Join();
+            pages.Add(new PoisonPill());
+            counter.Join();
         }
     }
 
-    class Page
+    static class Exts
     {
-        public string Title { get; }
-        public string Text { get; }
-
-        public Page(string title, string text)
+        public static void CountWord(this string text, Dictionary<string, int> counts)
         {
-            Title = title;
-            Text = text;
-        }
-    }
-
-    class Pages : IEnumerable<Page>
-    {
-        readonly int _maxPages;
-        readonly string _filename;
-
-        public Pages(int maxPages, string filename)
-        {
-            _maxPages = maxPages;
-            _filename = filename;
-        }
-
-        public IEnumerator<Page> GetEnumerator()
-        {
-            using (var reader = XmlReader.Create(_filename))
+            foreach (var word in new Words(text))
             {
-                var pagesYield = 0;
-                while (reader.ReadToFollowing("page") && pagesYield < _maxPages)
-                {
-                    if (!reader.ReadToDescendant("title"))
-                        continue;
-                    var title = reader.ReadElementContentAsString();
-
-                    if (!reader.ReadToFollowing("text"))
-                        continue;
-                    var text = reader.ReadElementContentAsString();
-
-                    yield return new Page(title, text);
-                    ++pagesYield;
-                }
+                if (counts.ContainsKey(word))
+                    counts[word] += 1;
+                else
+                    counts[word] = 1;
             }
         }
-
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
-    class Words : IEnumerable<string>
+    class Parser
     {
-        readonly string _text;
-
-        public Words(string text)
+        public static void Parse(BlockingCollection<Page> pages, int maxPages, string filename)
         {
-            _text = text;
+            try
+            {
+                foreach (var page in new Pages(maxPages, filename))
+                    pages.Add(page);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+            }
         }
+    }
 
-        public IEnumerator<string> GetEnumerator()
+    class Counter
+    {
+        public static void Count(BlockingCollection<Page> pages, Dictionary<string, int> counts)
         {
-            return _text.Split(' ', ',', '.', ':', '\t').AsEnumerable().GetEnumerator();
-        }
+            while (true)
+            {
+                var page = pages.Take();
+                if (page.IsPoisonPill)
+                    break;
 
-        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+                page.Text.CountWord(counts);
+            }
+        }
     }
 }
