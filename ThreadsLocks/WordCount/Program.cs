@@ -13,10 +13,11 @@ namespace WordCount
         static void Main(string[] args)
         {
             var start = DateTime.Now;
-            //RunSequential(); // 31secs
-            //RunProducerConsumer(); // 27secs
-            //RunSynchronizedDictionary(Environment.ProcessorCount); // 27secs
-            RunConcurrentDictionary(Environment.ProcessorCount); // 23secs
+            //RunSequential(); // 32secs
+            //RunProducerConsumer(); // 28secs
+            //RunDictionary(Environment.ProcessorCount, DictionaryOptions.Synchronized); // 27 secs
+            //RunDictionary(Environment.ProcessorCount, DictionaryOptions.Concurrent); // 23 secs
+            RunDictionary(Environment.ProcessorCount, DictionaryOptions.BatchConcurrent); // 23 secs
             Console.WriteLine($"Elapsed {DateTime.Now - start}.");
         }
 
@@ -42,17 +43,14 @@ namespace WordCount
             counter.Join();
         }
 
-        static void RunSynchronizedDictionary(int numConsumers)
+        enum DictionaryOptions
         {
-            RunThreadPool(numConsumers, false);
+            Synchronized,
+            Concurrent,
+            BatchConcurrent
         }
 
-        static void RunConcurrentDictionary(int numConsumers)
-        {
-            RunThreadPool(numConsumers, true);
-        }
-
-        static void RunThreadPool(int numConsumers, bool useConcurrentDictionary)
+        static void RunDictionary(int numConsumers, DictionaryOptions dictOption)
         {
             var pages = new BlockingCollection<Page>();
             var parser = new Thread(() => Parser.Parse(pages, MaxPages, Filename));
@@ -60,15 +58,30 @@ namespace WordCount
 
             using (var countdown = new CountdownEvent(numConsumers))
             {
-                if (useConcurrentDictionary)
-                    CountConcurrentDictionary(pages, numConsumers, countdown);
-                else
+                if (dictOption == DictionaryOptions.Synchronized)
                     CountSynchronizedDictionary(pages, numConsumers, countdown);
+                else if (dictOption == DictionaryOptions.Concurrent)
+                    CountConcurrentDictionary(pages, numConsumers, countdown);
+                else if (dictOption == DictionaryOptions.BatchConcurrent)
+                    CountBatchConcurrentDictionary(pages, numConsumers, countdown);
 
                 parser.Join();
                 for (int i = 0; i < numConsumers; ++i)
                     pages.Add(new PoisonPill());
                 countdown.Wait();
+            }
+        }
+
+        static void CountSynchronizedDictionary(BlockingCollection<Page> pages, int numCounters, CountdownEvent countdown)
+        {
+            var counts = new Dictionary<string, int>();
+            for (int i = 0; i < numCounters; ++i)
+            {
+                ThreadPool.QueueUserWorkItem(_ =>
+                {
+                    Counter.Count(pages, counts, true);
+                    countdown.Signal();
+                });
             }
         }
 
@@ -85,14 +98,17 @@ namespace WordCount
             }
         }
 
-        static void CountSynchronizedDictionary(BlockingCollection<Page> pages, int numCounters, CountdownEvent countdown)
+        static void CountBatchConcurrentDictionary(BlockingCollection<Page> pages, int numCounters, CountdownEvent countdown)
         {
-            var counts = new Dictionary<string, int>();
+            var counts = new ConcurrentDictionary<string, int>();
             for (int i = 0; i < numCounters; ++i)
             {
                 ThreadPool.QueueUserWorkItem(_ =>
                 {
-                    Counter.Count(pages, counts, true);
+                    var localCounts = new Dictionary<string, int>();
+                    Counter.Count(pages, localCounts, false);
+                    foreach (var kvp in localCounts)
+                        counts.AddOrUpdate(kvp.Key, kvp.Value, (k, oldValue) => oldValue + kvp.Value);
                     countdown.Signal();
                 });
             }
