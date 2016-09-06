@@ -10,12 +10,12 @@ namespace WordCount
         static int MaxPages => 100000;
         static string Filename => @"C:\Users\likeleon\Downloads\enwiki-latest-pages-articles1.xml";
 
-
         static void Main(string[] args)
         {
             var start = DateTime.Now;
-            //RunSequential();
-            RunProducerConsumer();
+            //RunSequential(); // 31secs
+            //RunProducerConsumer(); // 27secs
+            RunSynchronizedDictionary(); // 27secs
             Console.WriteLine($"Elapsed {DateTime.Now - start}.");
         }
 
@@ -33,25 +33,37 @@ namespace WordCount
             parser.Start();
 
             var counts = new Dictionary<string, int>();
-            var counter = new Thread(() => Counter.Count(pages, counts));
+            var counter = new Thread(() => Counter.Count(pages, counts, false));
             counter.Start();
 
             parser.Join();
             pages.Add(new PoisonPill());
             counter.Join();
         }
-    }
 
-    static class Exts
-    {
-        public static void CountWord(this string text, Dictionary<string, int> counts)
+        static void RunSynchronizedDictionary()
         {
-            foreach (var word in new Words(text))
+            var pages = new BlockingCollection<Page>();
+            var parser = new Thread(() => Parser.Parse(pages, MaxPages, Filename));
+            parser.Start();
+
+            int numCounters = 2;
+            using (var countdown = new CountdownEvent(numCounters))
             {
-                if (counts.ContainsKey(word))
-                    counts[word] += 1;
-                else
-                    counts[word] = 1;
+                var counts = new Dictionary<string, int>();
+                for (int i = 0; i < numCounters; ++i)
+                {
+                    ThreadPool.QueueUserWorkItem(_ =>
+                    {
+                        Counter.Count(pages, counts, true);
+                        countdown.Signal();
+                    });
+                }
+
+                parser.Join();
+                for (int i = 0; i < numCounters; ++i)
+                    pages.Add(new PoisonPill());
+                countdown.Wait();
             }
         }
     }
@@ -74,7 +86,7 @@ namespace WordCount
 
     class Counter
     {
-        public static void Count(BlockingCollection<Page> pages, Dictionary<string, int> counts)
+        public static void Count(BlockingCollection<Page> pages, Dictionary<string, int> counts, bool synchronized)
         {
             while (true)
             {
@@ -82,8 +94,31 @@ namespace WordCount
                 if (page.IsPoisonPill)
                     break;
 
-                page.Text.CountWord(counts);
+                if (synchronized)
+                    page.Text.CountWordWithLock(counts);
+                else
+                    page.Text.CountWord(counts);
             }
+        }
+    }
+
+    static class Exts
+    {
+        public static void CountWord(this string text, Dictionary<string, int> counts)
+        {
+            foreach (var word in new Words(text))
+            {
+                if (counts.ContainsKey(word))
+                    counts[word] += 1;
+                else
+                    counts[word] = 1;
+            }
+        }
+
+        public static void CountWordWithLock(this string text, Dictionary<string, int> counts)
+        {
+            lock (counts)
+                CountWord(text, counts);
         }
     }
 }
