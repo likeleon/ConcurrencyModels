@@ -19,6 +19,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConcurrentSortedList", "Thr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoServer", "ThreadsLocks\EchoServer\EchoServer.csproj", "{912E32D4-2C90-4284-B131-775B77C061E0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCount", "ThreadsLocks\WordCount\WordCount.csproj", "{085856D9-E65A-432C-AD5B-6B8298D52E07}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -53,6 +55,10 @@ Global
 		{912E32D4-2C90-4284-B131-775B77C061E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{912E32D4-2C90-4284-B131-775B77C061E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{912E32D4-2C90-4284-B131-775B77C061E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -65,5 +71,6 @@ Global
 		{5A33F6C7-8465-47C3-9EDC-1EB44807E9D5} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{A1738C62-8854-4C7E-B5D1-7E149071894E} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{912E32D4-2C90-4284-B131-775B77C061E0} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
+		{085856D9-E65A-432C-AD5B-6B8298D52E07} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 	EndGlobalSection
 EndGlobal
