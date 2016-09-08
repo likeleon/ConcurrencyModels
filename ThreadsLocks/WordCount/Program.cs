@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace WordCount
 {
@@ -15,9 +16,10 @@ namespace WordCount
             var start = DateTime.Now;
             //RunSequential(); // 32secs
             //RunProducerConsumer(); // 28secs
-            //RunDictionary(Environment.ProcessorCount, DictionaryOptions.Synchronized); // 27 secs
-            //RunDictionary(Environment.ProcessorCount, DictionaryOptions.Concurrent); // 23 secs
-            RunDictionary(Environment.ProcessorCount, DictionaryOptions.BatchConcurrent); // 23 secs
+            //RunThreadPool(Environment.ProcessorCount, DictionaryOptions.Synchronized); // 27 secs
+            //RunThreadPool(Environment.ProcessorCount, DictionaryOptions.Concurrent); // 23 secs
+            //RunThreadPool(Environment.ProcessorCount, DictionaryOptions.BatchConcurrent); // 23 secs
+            RunTasks(Environment.ProcessorCount).Wait(); // 15 secs
             Console.WriteLine($"Elapsed {DateTime.Now - start}.");
         }
 
@@ -50,7 +52,7 @@ namespace WordCount
             BatchConcurrent
         }
 
-        static void RunDictionary(int numConsumers, DictionaryOptions dictOption)
+        static void RunThreadPool(int numConsumers, DictionaryOptions dictOption)
         {
             var pages = new BlockingCollection<Page>();
             var parser = new Thread(() => Parser.Parse(pages, MaxPages, Filename));
@@ -111,6 +113,44 @@ namespace WordCount
                         counts.AddOrUpdate(kvp.Key, kvp.Value, (k, oldValue) => oldValue + kvp.Value);
                     countdown.Signal();
                 });
+            }
+        }
+
+        static async Task RunTasks(int numConsumers)
+        {
+            var pages = new BlockingCollection<Page>();
+            var parser = new Thread(() => Parser.Parse(pages, MaxPages, Filename));
+            parser.Start();
+
+            var tasks = new List<Task<Dictionary<string, int>>>();
+            for (int i = 0; i < numConsumers; ++i)
+            {
+                tasks.Add(Task.Run(() =>
+                {
+                    var localCounts = new Dictionary<string, int>();
+                    Counter.Count(pages, localCounts, false);
+                    return localCounts;
+                }));
+            }
+
+            parser.Join();
+            for (int i = 0; i < numConsumers; ++i)
+                pages.Add(new PoisonPill());
+
+            var counts = new Dictionary<string, int>();
+            while (tasks.Count > 0)
+            {
+                var finishedTask = await Task.WhenAny(tasks);
+                tasks.Remove(finishedTask);
+
+                foreach (var x in await finishedTask)
+                {
+                    int count;
+                    if (counts.TryGetValue(x.Key, out count))
+                        counts[x.Key] = count + x.Value;
+                    else
+                        counts[x.Key] = count;
+                }
             }
         }
     }
