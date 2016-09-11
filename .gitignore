@@ -250,3 +250,6 @@ paket-files/
 # JetBrains Rider
 .idea/
 *.sln.iml
+/FunctionalProgramming/WorldCountClojure/target
+/FunctionalProgramming/WorldCountClojure/.nrepl-port
+/FunctionalProgramming/WorldCountClojure/.lein-repl-history
