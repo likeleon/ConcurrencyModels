@@ -65,10 +65,10 @@ namespace WordCount
         {
             Interlocked.Increment(ref pagesCount);
             Console.WriteLine($"#{pagesCount}. Counting pages");
-            return pages
-                .SelectMany(p => GetWords(p))
-                .GroupBy(x => x)
-                .ToDictionary(x => x.Key, x => x.Count());
+            var ret = new Dictionary<string, int>();
+            foreach (var word in pages.SelectMany(p => GetWords(p)))
+                AddOrUpdate(ret, word, 1, (_, old) => old + 1);
+            return ret;
         }
 
         static IEnumerable<string> GetWords(string text)
@@ -76,17 +76,21 @@ namespace WordCount
             return text.Split(' ', ',', '.', ':', '\t');
         }
 
-        static Dictionary<string, int> MergeWith(Dictionary<string, int> a, Dictionary<string, int> b)
+        static Dictionary<string, int> MergeWith(Dictionary<string, int> dict1, Dictionary<string, int> dict2)
         {
-            var ret = new Dictionary<string, int>(a);
-            foreach (var x in b)
-            {
-                if (ret.ContainsKey(x.Key))
-                    ret[x.Key] += x.Value;
-                else
-                    ret[x.Key] = x.Value;
-            }
+            var ret = new Dictionary<string, int>(dict1);
+            foreach (var x in dict2)
+                AddOrUpdate(ret, x.Key, x.Value, (_, old) => old + x.Value);
             return ret;
+        }
+
+        static void AddOrUpdate<TKey, TValue>(Dictionary<TKey, TValue> dict, TKey key, TValue value, Func<TKey, TValue, TValue> updater)
+        {
+            TValue oldValue;
+            if (dict.TryGetValue(key, out oldValue))
+                dict[key] = updater(key, oldValue);
+            else
+                dict[key] = value;
         }
     }
 }
