@@ -21,6 +21,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EchoServer", "ThreadsLocks\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCount", "ThreadsLocks\WordCount\WordCount.csproj", "{085856D9-E65A-432C-AD5B-6B8298D52E07}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "FunctionalProgramming", "FunctionalProgramming", "{81910E42-7BD5-4489-8D9E-76276A2C55CC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WordCount", "FunctionalProgramming\WordCount\WordCount.csproj", "{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +63,10 @@ Global
 		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{085856D9-E65A-432C-AD5B-6B8298D52E07}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -72,5 +80,6 @@ Global
 		{A1738C62-8854-4C7E-B5D1-7E149071894E} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{912E32D4-2C90-4284-B131-775B77C061E0} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
 		{085856D9-E65A-432C-AD5B-6B8298D52E07} = {609C97DD-57FF-4F36-99F5-760D0B2C34CA}
+		{CD5DF7C2-5D42-4B19-9B32-87F0925AB9EF} = {81910E42-7BD5-4489-8D9E-76276A2C55CC}
 	EndGlobalSection
 EndGlobal
