@@ -36,6 +36,7 @@ namespace WordCount
     static class Exts
     {
         static int pagesCount;
+
         public static void CountWords(this IEnumerable<string> pages)
         {
             var dicts = pages.PartitionAll(100)
@@ -44,13 +45,7 @@ namespace WordCount
 
             var counts = new Dictionary<string, int>();
             foreach (var x in dicts.SelectMany(x => x))
-            {
-                int count;
-                if (counts.TryGetValue(x.Key, out count))
-                    counts[x.Key] = count + x.Value;
-                else
-                    counts[x.Key] = count;
-            }
+                AddOrUpdate(counts, x.Key, x.Value, (_, old) => old + x.Value);
         }
 
         static IEnumerable<T[]> PartitionAll<T>(this IEnumerable<T> source, int n)

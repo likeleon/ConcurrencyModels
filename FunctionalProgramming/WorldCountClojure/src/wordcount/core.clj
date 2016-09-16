@@ -24,6 +24,10 @@
 (defn get-words [text]
   (re-seq #"\w+" text))
 
+(defn count-words-parallel [pages]
+  (reduce (partial merge-with +)
+    (pmap #(frequencies (get-words %)) pages)))
+
 (defn count-words-sequential [pages]
   (frequencies (mapcat get-words pages)))
 
