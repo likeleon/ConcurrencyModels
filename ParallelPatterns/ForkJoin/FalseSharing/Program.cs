@@ -9,10 +9,10 @@ namespace FalseSharing
         static void Main(string[] args)
         {
             var watch = Stopwatch.StartNew();
-            //WithFalseSharing();
-            WithoutFalseSharing();
+            //WithFalseSharing(); // 651 ms
+            WithoutFalseSharing(); // 239 ms
             watch.Stop();
-            Console.WriteLine($"{watch.Elapsed}");
+            Console.WriteLine($"{watch.Elapsed.Milliseconds} ms");
         }
 
         static void WithFalseSharing()
