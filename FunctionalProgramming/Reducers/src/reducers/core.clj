@@ -8,6 +8,10 @@
 
 (defn make-reducer [reducible transformf]
   (reify
+    CollFold
+    (coll-fold [_ n combinef reducef]
+      (coll-fold reducible n combinef (transformf reducef)))
+
     CollReduce
     (coll-reduce [_ f1]
       (coll-reduce reducible (transformf f1) (f1)))
@@ -20,4 +24,16 @@
                   (fn [acc v]
                     (reducef acc (mapf v))))))
 
+(defn my-fold
+  ([reducef coll]
+   (my-fold reducef reducef coll))
+  ([combinef reducef coll]
+   (my-fold 512 combinef reducef coll))
+  ([n combinef reducef coll]
+   (coll-fold coll n combinef reducef)))
+
 (print (into [] (my-map (partial * 2) (my-map (partial + 1) [1 2 3 4]))))
+
+(def v (into [] (range 1000000)))
+(time (my-reduce + v))
+(time (my-fold + v))
